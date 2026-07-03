@@ -19,5 +19,5 @@ addopts = [
     "--strict-markers",
 ]
 testpaths = [
-    "tests",
+    "app/tests",
 ]
