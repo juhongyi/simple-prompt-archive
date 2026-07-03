@@ -157,6 +157,18 @@ def test_export_markdown_rejects_path_conflicts_before_writing(tmp_path) -> None
     assert (output_dir / "0001-writing").read_text(encoding="utf-8") == "not a directory"
 
 
+def test_export_markdown_rejects_file_path_directory_conflict_before_writing(tmp_path) -> None:
+    output_dir = tmp_path / "data"
+    conflicting_file_path = output_dir / "0001-writing" / "0001-better-title.md"
+    conflicting_file_path.mkdir(parents=True)
+
+    with pytest.raises(MarkdownExportError):
+        export_markdown([prompt(category="Writing")], output_dir)
+
+    assert conflicting_file_path.is_dir()
+    assert list(conflicting_file_path.iterdir()) == []
+
+
 def test_export_markdown_rejects_too_many_categories_without_filesystem_changes(tmp_path) -> None:
     output_dir = tmp_path / "data"
     prompts = [prompt(title=f"Prompt {index}", category=f"Category {index}") for index in range(10_000)]

@@ -81,6 +81,15 @@ def test_list_prompt_selection_views_detail_and_zero_returns_to_menu() -> None:
     assert any("Returning to main menu." in line for line in output)
 
 
+def test_invalid_prompt_selection_does_not_change_data() -> None:
+    prompts = make_prompts()
+
+    output = run_with_inputs(["2", "99", "14"], prompts=prompts)
+
+    assert [prompt["usage_count"] for prompt in prompts] == [0, 2]
+    assert "Invalid choice. Please enter a listed number." in output
+
+
 def test_category_flow_uses_category_and_prompt_screen_numbering() -> None:
     prompts = make_prompts()
 

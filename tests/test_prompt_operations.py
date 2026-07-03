@@ -41,6 +41,17 @@ def test_add_prompt_appends_with_default_state() -> None:
     assert added is prompts[-1]
 
 
+def test_add_prompt_allows_duplicate_title_and_content() -> None:
+    prompts = []
+
+    add_prompt(prompts, "Repeat", "Same body", "Writing")
+    add_prompt(prompts, "Repeat", "Same body", "Writing")
+
+    assert len(prompts) == 2
+    assert prompts[0] is not prompts[1]
+    assert prompts[0] == prompts[1]
+
+
 def test_add_prompt_rejects_blank_required_fields() -> None:
     prompts = []
 
