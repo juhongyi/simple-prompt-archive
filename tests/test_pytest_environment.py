@@ -4,8 +4,8 @@ import sys
 import pytest
 
 
-def test_python_version_is_313() -> None:
-    assert sys.version_info[:2] == (3, 13)
+def test_python_version_satisfies_project_requirement() -> None:
+    assert sys.version_info >= (3, 13)
 
 
 def test_pytest_version_is_latest_stable_major_range() -> None:
