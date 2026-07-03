@@ -35,6 +35,15 @@ def test_export_json_writes_standard_schema_and_drops_extra_fields(tmp_path: Pat
     }
 
 
+def test_export_json_reports_filesystem_failures_as_storage_error(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "data").write_text("not a directory", encoding="utf-8")
+
+    with pytest.raises(storage.StorageError):
+        storage.export_json([], tmp_path)
+
+
 def test_import_json_replaces_with_file_order_and_preserves_extra_fields(
     tmp_path: Path,
 ) -> None:

@@ -29,15 +29,18 @@ def standard_prompt(prompt):
 
 def export_json(prompts, root=None):
     path = json_file_path(root)
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "version": VERSION,
         "prompts": [standard_prompt(prompt) for prompt in prompts],
     }
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        raise StorageError("JSON 파일을 쓸 수 없습니다.") from exc
     return path
 
 
