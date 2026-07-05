@@ -41,34 +41,11 @@ def run_app(input_func=input, output_func=print, root=None, prompts=None):
             output_func("프로그램을 종료합니다.")
             break
         try:
-            if choice == "1":
-                handle_add_prompt(active_prompts, input_func, output_func)
-            elif choice == "2":
-                handle_list_prompts(active_prompts, input_func, output_func)
-            elif choice == "3":
-                handle_category_view(active_prompts, input_func, output_func)
-            elif choice == "4":
-                handle_search(active_prompts, input_func, output_func)
-            elif choice == "5":
-                handle_detail_view(active_prompts, input_func, output_func)
-            elif choice == "6":
-                handle_favorite_toggle(active_prompts, input_func, output_func)
-            elif choice == "7":
-                handle_favorites(active_prompts, input_func, output_func)
-            elif choice == "8":
-                handle_update(active_prompts, input_func, output_func)
-            elif choice == "9":
-                handle_delete(active_prompts, input_func, output_func)
-            elif choice == "10":
-                handle_usage_sorted(active_prompts, input_func, output_func)
-            elif choice == "11":
-                handle_json_export(active_prompts, output_func, root)
-            elif choice == "12":
-                handle_json_import(active_prompts, output_func, root)
-            elif choice == "13":
-                handle_markdown_export(active_prompts, output_func, root)
-            else:
+            action = MENU_ACTIONS.get(choice)
+            if action is None:
                 output_func("올바른 메뉴 번호를 입력해주세요.")
+            else:
+                action(active_prompts, input_func, output_func, root)
         except EOFError:
             output_func("입력이 종료되어 프로그램을 종료합니다.")
             break
@@ -122,15 +99,13 @@ def handle_add_prompt(prompts, input_func, output_func):
 
 
 def handle_list_prompts(prompts, input_func, output_func):
-    if not prompts:
-        output_func("저장된 프롬프트가 없습니다.")
-        return
-
-    output_func("전체 프롬프트 목록")
-    print_prompt_rows(prompts, output_func, include_category=True)
-    selected = read_prompt_selection(prompts, input_func, output_func)
-    if selected is not None:
-        show_prompt_detail(selected, output_func)
+    show_prompt_list_detail_flow(
+        prompts,
+        input_func,
+        output_func,
+        "전체 프롬프트 목록",
+        include_category=True,
+    )
 
 
 def handle_category_view(prompts, input_func, output_func):
@@ -163,11 +138,13 @@ def handle_category_view(prompts, input_func, output_func):
         output_func("결과가 없습니다.")
         return
 
-    output_func(f"{categories[number - 1]} 프롬프트 목록")
-    print_prompt_rows(category_prompts, output_func, include_category=False)
-    selected = read_prompt_selection(category_prompts, input_func, output_func)
-    if selected is not None:
-        show_prompt_detail(selected, output_func)
+    show_prompt_list_detail_flow(
+        category_prompts,
+        input_func,
+        output_func,
+        f"{categories[number - 1]} 프롬프트 목록",
+        include_category=False,
+    )
 
 
 def handle_search(prompts, input_func, output_func):
@@ -182,15 +159,13 @@ def handle_search(prompts, input_func, output_func):
 
 
 def handle_detail_view(prompts, input_func, output_func):
-    if not prompts:
-        output_func("저장된 프롬프트가 없습니다.")
-        return
-
-    output_func("상세 보기 프롬프트 목록")
-    print_prompt_rows(prompts, output_func, include_category=True)
-    selected = read_prompt_selection(prompts, input_func, output_func)
-    if selected is not None:
-        show_prompt_detail(selected, output_func)
+    show_prompt_list_detail_flow(
+        prompts,
+        input_func,
+        output_func,
+        "상세 보기 프롬프트 목록",
+        include_category=True,
+    )
 
 
 def handle_favorite_toggle(prompts, input_func, output_func):
@@ -211,15 +186,14 @@ def handle_favorite_toggle(prompts, input_func, output_func):
 
 def handle_favorites(prompts, input_func, output_func):
     favorites = archive.favorite_prompts(prompts)
-    if not favorites:
-        output_func("즐겨찾기된 프롬프트가 없습니다.")
-        return
-
-    output_func("즐겨찾기 목록")
-    print_prompt_rows(favorites, output_func, include_category=True)
-    selected = read_prompt_selection(favorites, input_func, output_func)
-    if selected is not None:
-        show_prompt_detail(selected, output_func)
+    show_prompt_list_detail_flow(
+        favorites,
+        input_func,
+        output_func,
+        "즐겨찾기 목록",
+        include_category=True,
+        empty_message="즐겨찾기된 프롬프트가 없습니다.",
+    )
 
 
 def handle_update(prompts, input_func, output_func):
@@ -286,21 +260,15 @@ def handle_delete(prompts, input_func, output_func):
 
 
 def handle_usage_sorted(prompts, input_func, output_func):
-    if not prompts:
-        output_func("저장된 프롬프트가 없습니다.")
-        return
-
     sorted_prompts = archive.sort_by_usage_count(prompts)
-    output_func("조회수 정렬 목록")
-    print_prompt_rows(
+    show_prompt_list_detail_flow(
         sorted_prompts,
+        input_func,
         output_func,
+        "조회수 정렬 목록",
         include_category=True,
         include_usage=True,
     )
-    selected = read_prompt_selection(sorted_prompts, input_func, output_func)
-    if selected is not None:
-        show_prompt_detail(selected, output_func)
 
 
 def handle_json_export(prompts, output_func, root=None):
@@ -348,6 +316,26 @@ def read_prompt_selection(prompts, input_func, output_func):
     return selected
 
 
+def show_prompt_list_detail_flow(
+    prompts,
+    input_func,
+    output_func,
+    heading,
+    include_category,
+    include_usage=False,
+    empty_message="저장된 프롬프트가 없습니다.",
+):
+    if not prompts:
+        output_func(empty_message)
+        return
+
+    output_func(heading)
+    print_prompt_rows(prompts, output_func, include_category, include_usage)
+    selected = read_prompt_selection(prompts, input_func, output_func)
+    if selected is not None:
+        show_prompt_detail(selected, output_func)
+
+
 def read_number(input_func):
     return int(read_line(input_func).strip())
 
@@ -391,3 +379,72 @@ def show_prompt_detail(prompt, output_func):
     output_func(f"조회수: {prompt['usage_count']}")
     output_func("본문:")
     output_func(prompt["content"])
+
+
+MENU_ACTIONS = {
+    "1": lambda prompts, input_func, output_func, root: handle_add_prompt(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "2": lambda prompts, input_func, output_func, root: handle_list_prompts(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "3": lambda prompts, input_func, output_func, root: handle_category_view(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "4": lambda prompts, input_func, output_func, root: handle_search(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "5": lambda prompts, input_func, output_func, root: handle_detail_view(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "6": lambda prompts, input_func, output_func, root: handle_favorite_toggle(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "7": lambda prompts, input_func, output_func, root: handle_favorites(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "8": lambda prompts, input_func, output_func, root: handle_update(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "9": lambda prompts, input_func, output_func, root: handle_delete(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "10": lambda prompts, input_func, output_func, root: handle_usage_sorted(
+        prompts,
+        input_func,
+        output_func,
+    ),
+    "11": lambda prompts, input_func, output_func, root: handle_json_export(
+        prompts,
+        output_func,
+        root,
+    ),
+    "12": lambda prompts, input_func, output_func, root: handle_json_import(
+        prompts,
+        output_func,
+        root,
+    ),
+    "13": lambda prompts, input_func, output_func, root: handle_markdown_export(
+        prompts,
+        output_func,
+        root,
+    ),
+}
