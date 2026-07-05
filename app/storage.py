@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 from pathlib import Path
 
@@ -9,6 +10,13 @@ MAX_ORDER = 9999
 
 class StorageError(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class _MarkdownExportItem:
+    directory: Path
+    path: Path
+    prompt: dict
 
 
 def project_root():
@@ -29,14 +37,10 @@ def standard_prompt(prompt):
 
 def export_json(prompts, root=None):
     path = json_file_path(root)
-    payload = {
-        "version": VERSION,
-        "prompts": [standard_prompt(prompt) for prompt in prompts],
-    }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2),
+            json.dumps(_json_payload(prompts), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
     except OSError as exc:
@@ -89,8 +93,7 @@ def export_markdown(prompts, root=None):
     export_plan = _plan_markdown_export(prompts, data_dir)
 
     if not export_plan:
-        if data_dir.exists() and not data_dir.is_dir():
-            raise StorageError("data 위치에 파일이 있어 내보낼 수 없습니다.")
+        _validate_data_directory(data_dir)
         data_dir.mkdir(parents=True, exist_ok=True)
         return []
 
@@ -98,10 +101,10 @@ def export_markdown(prompts, root=None):
 
     data_dir.mkdir(parents=True, exist_ok=True)
     written_paths = []
-    for directory, path, prompt in export_plan:
-        directory.mkdir(parents=True, exist_ok=True)
-        path.write_text(_format_markdown_prompt(prompt), encoding="utf-8")
-        written_paths.append(path)
+    for item in export_plan:
+        item.directory.mkdir(parents=True, exist_ok=True)
+        item.path.write_text(_format_markdown_prompt(item.prompt), encoding="utf-8")
+        written_paths.append(item.path)
     return written_paths
 
 
@@ -128,20 +131,31 @@ def _plan_markdown_export(prompts, data_dir):
             if not prompt_slug:
                 raise StorageError("프롬프트 slug가 비어 있습니다.")
             path = directory / f"{prompt_index:04d}-{prompt_slug}.md"
-            export_plan.append((directory, path, prompt))
+            export_plan.append(_MarkdownExportItem(directory, path, prompt))
 
     return export_plan
 
 
 def _validate_markdown_paths(data_dir, export_plan):
+    _validate_data_directory(data_dir)
+
+    for item in export_plan:
+        if item.directory.exists() and not item.directory.is_dir():
+            raise StorageError("필요한 폴더 위치에 파일이 있습니다.")
+        if item.path.exists() and not item.path.is_file():
+            raise StorageError("필요한 파일 위치에 폴더가 있습니다.")
+
+
+def _json_payload(prompts):
+    return {
+        "version": VERSION,
+        "prompts": [standard_prompt(prompt) for prompt in prompts],
+    }
+
+
+def _validate_data_directory(data_dir):
     if data_dir.exists() and not data_dir.is_dir():
         raise StorageError("data 위치에 파일이 있어 내보낼 수 없습니다.")
-
-    for directory, path, _ in export_plan:
-        if directory.exists() and not directory.is_dir():
-            raise StorageError("필요한 폴더 위치에 파일이 있습니다.")
-        if path.exists() and not path.is_file():
-            raise StorageError("필요한 파일 위치에 폴더가 있습니다.")
 
 
 def _group_prompts_by_category(prompts):
