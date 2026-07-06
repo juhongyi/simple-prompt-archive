@@ -1,5 +1,4 @@
-STANDARD_FIELDS = ("title", "content", "category", "favorite", "usage_count")
-EDITABLE_FIELDS = ("title", "content", "category")
+from prompt_schema import EDITABLE_FIELDS, STANDARD_FIELDS
 
 
 def create_starter_prompts():

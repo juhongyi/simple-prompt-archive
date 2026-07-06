@@ -2,9 +2,9 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 
+from prompt_schema import STANDARD_FIELDS
 
 VERSION = 1
-STANDARD_FIELDS = ("title", "content", "category", "favorite", "usage_count")
 MAX_ORDER = 9999
 
 

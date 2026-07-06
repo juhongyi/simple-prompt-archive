@@ -1,4 +1,5 @@
 import archive
+from prompt_schema import EDIT_FIELD_CHOICES
 import storage
 
 
@@ -18,13 +19,6 @@ MENU_ITEMS = (
     ("13", "Markdown 내보내기"),
     ("0", "종료"),
 )
-
-EDIT_FIELD_CHOICES = {
-    1: ("title", "제목"),
-    2: ("content", "본문"),
-    3: ("category", "카테고리"),
-}
-
 
 def run_app(input_func=input, output_func=print, root=None, prompts=None):
     active_prompts = prompts if prompts is not None else archive.create_starter_prompts()
