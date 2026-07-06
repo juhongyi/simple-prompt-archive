@@ -1,94 +1,10 @@
 import archive
 import storage
 
-MENU_ITEMS = (
-    ("1", "프롬프트 추가"),
-    ("2", "목록 보기"),
-    ("3", "카테고리별 조회"),
-    ("4", "검색"),
-    ("5", "상세 보기"),
-    ("6", "즐겨찾기 관리"),
-    ("7", "즐겨찾기 목록"),
-    ("8", "수정"),
-    ("9", "삭제"),
-    ("10", "조회수 정렬 목록"),
-    ("11", "JSON 내보내기"),
-    ("12", "JSON 가져오기"),
-    ("13", "Markdown 내보내기"),
-    ("0", "종료"),
-)
-
-EDIT_FIELD_CHOICES = {
-    1: ("title", "제목"),
-    2: ("content", "본문"),
-    3: ("category", "카테고리"),
-}
-
-
-def run_app(input_func=input, output_func=print, root=None, prompts=None):
-    active_prompts = (
-        prompts if prompts is not None else archive.create_starter_prompts()
-    )
-
-    while True:
-        print_menu(output_func)
-        try:
-            choice = read_line(input_func).strip()
-        except EOFError:
-            output_func("입력이 종료되어 프로그램을 종료합니다.")
-            break
-
-        if choice == "0":
-            output_func("프로그램을 종료합니다.")
-            break
-        try:
-            action = MENU_ACTIONS.get(choice)
-            if action is None:
-                output_func("올바른 메뉴 번호를 입력해주세요.")
-            else:
-                action(active_prompts, input_func, output_func, root)
-        except EOFError:
-            output_func("입력이 종료되어 프로그램을 종료합니다.")
-            break
-
-    return active_prompts
-
-
-def print_menu(output_func):
-    output_func("")
-    output_func("Simple Prompt Archive")
-    for number, label in MENU_ITEMS:
-        output_func(f"{number}. {label}")
-    output_func("메뉴 번호를 입력하세요:")
-
-
-def read_line(input_func):
-    return input_func()
-
-
-def read_required_text(label, input_func, output_func):
-    while True:
-        output_func(f"{label}:")
-        value = read_line(input_func).strip()
-        if value:
-            return value
-        output_func("필수 입력 항목은 비워둘 수 없습니다.")
-
-
-def read_multiline_content(input_func, output_func):
-    while True:
-        output_func("본문을 입력하세요. 단독 EOF 줄로 입력을 종료합니다:")
-        lines = []
-        while True:
-            line = read_line(input_func)
-            if line == "EOF":
-                break
-            lines.append(line)
-
-        content = "\n".join(lines).strip()
-        if content:
-            return content
-        output_func("필수 입력 항목은 비워둘 수 없습니다.")
+from .constants import EDIT_FIELD_CHOICES
+from .io import read_multiline_content, read_number, read_prompt_selection
+from .io import read_required_text
+from .views import print_prompt_rows, print_search_rows, show_prompt_detail
 
 
 def handle_add_prompt(prompts, input_func, output_func):
@@ -300,23 +216,6 @@ def handle_markdown_export(prompts, output_func, root=None):
     output_func(f"Markdown 내보내기 완료: {len(paths)}개")
 
 
-def read_prompt_selection(prompts, input_func, output_func):
-    output_func("프롬프트 번호를 입력하세요. 0은 메뉴로 돌아갑니다:")
-    try:
-        number = read_number(input_func)
-        selected = archive.select_prompt_by_number(prompts, number)
-    except ValueError:
-        output_func("숫자를 입력해주세요.")
-        return None
-    except IndexError as exc:
-        output_func(str(exc))
-        return None
-
-    if selected is None:
-        output_func("메뉴로 돌아갑니다.")
-    return selected
-
-
 def show_prompt_list_detail_flow(
     prompts,
     input_func,
@@ -335,51 +234,6 @@ def show_prompt_list_detail_flow(
     selected = read_prompt_selection(prompts, input_func, output_func)
     if selected is not None:
         show_prompt_detail(selected, output_func)
-
-
-def read_number(input_func):
-    return int(read_line(input_func).strip())
-
-
-def print_prompt_rows(prompts, output_func, include_category, include_usage=False):
-    for index, prompt in enumerate(prompts, start=1):
-        parts = [f"{index}."]
-        if include_category:
-            parts.append(f"[{prompt['category']}]")
-        parts.append(prompt["title"])
-        parts.append(favorite_marker(prompt))
-        if include_usage:
-            parts.append(f"(조회수: {prompt['usage_count']})")
-        output_func(" ".join(parts))
-
-
-def print_search_rows(prompts, output_func):
-    for prompt in prompts:
-        output_func(
-            " ".join(
-                [
-                    "-",
-                    f"[{prompt['category']}]",
-                    prompt["title"],
-                    favorite_marker(prompt),
-                ]
-            )
-        )
-
-
-def favorite_marker(prompt):
-    return "★" if prompt["favorite"] else "☆"
-
-
-def show_prompt_detail(prompt, output_func):
-    archive.record_detail_view(prompt)
-    output_func("프롬프트 상세")
-    output_func(f"제목: {prompt['title']}")
-    output_func(f"카테고리: {prompt['category']}")
-    output_func(f"즐겨찾기: {'예' if prompt['favorite'] else '아니오'}")
-    output_func(f"조회수: {prompt['usage_count']}")
-    output_func("본문:")
-    output_func(prompt["content"])
 
 
 MENU_ACTIONS = {
