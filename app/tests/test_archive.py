@@ -1,6 +1,5 @@
-import pytest
-
 import archive
+import pytest
 
 
 def test_starter_prompts_include_required_fields() -> None:
@@ -50,7 +49,7 @@ def test_add_prompt_rejects_blank_required_values(
 ) -> None:
     prompts = []
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="필수 입력 항목"):
         archive.add_prompt(prompts, title, content, category)
 
     assert prompts == []
@@ -137,10 +136,10 @@ def test_update_prompt_field_trims_text_without_touching_other_state() -> None:
 def test_update_prompt_field_rejects_blank_and_unsupported_fields() -> None:
     prompt = {"title": "old", "content": "body", "category": "writing"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="필수 입력 항목"):
         archive.update_prompt_field(prompt, "content", "  ")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="수정할 수 없는 필드"):
         archive.update_prompt_field(prompt, "favorite", "true")
 
     assert prompt == {"title": "old", "content": "body", "category": "writing"}

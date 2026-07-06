@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
-
 
 VERSION = 1
 STANDARD_FIELDS = ("title", "content", "category", "favorite", "usage_count")
