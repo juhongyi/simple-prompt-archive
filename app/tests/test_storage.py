@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 
 import pytest
-
 import storage
 
 
-def test_export_json_writes_standard_schema_and_drops_extra_fields(tmp_path: Path) -> None:
+def test_export_json_writes_standard_schema_and_drops_extra_fields(
+    tmp_path: Path,
+) -> None:
     prompts = [
         {
             "title": "제목",

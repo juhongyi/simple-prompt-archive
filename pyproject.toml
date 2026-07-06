@@ -8,10 +8,18 @@ dependencies = []
 [dependency-groups]
 dev = [
     "pytest>=9.1.1,<10",
+    "ruff==0.15.20",
 ]
 
 [tool.uv]
 package = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "ARG", "PT", "RUF"]
 
 [tool.pytest.ini_options]
 addopts = [

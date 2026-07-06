@@ -9,7 +9,9 @@ import console
 def test_user_adds_reuses_exports_and_deletes_prompt(tmp_path: Path) -> None:
     prompts, outputs = run_app_with_inputs(tmp_path, core_user_journey_inputs())
 
-    exported_prompt = find_prompt(read_exported_prompts(tmp_path), "Weekly Review Coach")
+    exported_prompt = find_prompt(
+        read_exported_prompts(tmp_path), "Weekly Review Coach"
+    )
 
     assert prompts == archive.create_starter_prompts()
     assert exported_prompt["category"] == "work"

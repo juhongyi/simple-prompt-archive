@@ -1,7 +1,6 @@
 import archive
 import storage
 
-
 MENU_ITEMS = (
     ("1", "프롬프트 추가"),
     ("2", "목록 보기"),
@@ -27,7 +26,9 @@ EDIT_FIELD_CHOICES = {
 
 
 def run_app(input_func=input, output_func=print, root=None, prompts=None):
-    active_prompts = prompts if prompts is not None else archive.create_starter_prompts()
+    active_prompts = (
+        prompts if prompts is not None else archive.create_starter_prompts()
+    )
 
     while True:
         print_menu(output_func)
@@ -382,67 +383,67 @@ def show_prompt_detail(prompt, output_func):
 
 
 MENU_ACTIONS = {
-    "1": lambda prompts, input_func, output_func, root: handle_add_prompt(
+    "1": lambda prompts, input_func, output_func, _root: handle_add_prompt(
         prompts,
         input_func,
         output_func,
     ),
-    "2": lambda prompts, input_func, output_func, root: handle_list_prompts(
+    "2": lambda prompts, input_func, output_func, _root: handle_list_prompts(
         prompts,
         input_func,
         output_func,
     ),
-    "3": lambda prompts, input_func, output_func, root: handle_category_view(
+    "3": lambda prompts, input_func, output_func, _root: handle_category_view(
         prompts,
         input_func,
         output_func,
     ),
-    "4": lambda prompts, input_func, output_func, root: handle_search(
+    "4": lambda prompts, input_func, output_func, _root: handle_search(
         prompts,
         input_func,
         output_func,
     ),
-    "5": lambda prompts, input_func, output_func, root: handle_detail_view(
+    "5": lambda prompts, input_func, output_func, _root: handle_detail_view(
         prompts,
         input_func,
         output_func,
     ),
-    "6": lambda prompts, input_func, output_func, root: handle_favorite_toggle(
+    "6": lambda prompts, input_func, output_func, _root: handle_favorite_toggle(
         prompts,
         input_func,
         output_func,
     ),
-    "7": lambda prompts, input_func, output_func, root: handle_favorites(
+    "7": lambda prompts, input_func, output_func, _root: handle_favorites(
         prompts,
         input_func,
         output_func,
     ),
-    "8": lambda prompts, input_func, output_func, root: handle_update(
+    "8": lambda prompts, input_func, output_func, _root: handle_update(
         prompts,
         input_func,
         output_func,
     ),
-    "9": lambda prompts, input_func, output_func, root: handle_delete(
+    "9": lambda prompts, input_func, output_func, _root: handle_delete(
         prompts,
         input_func,
         output_func,
     ),
-    "10": lambda prompts, input_func, output_func, root: handle_usage_sorted(
+    "10": lambda prompts, input_func, output_func, _root: handle_usage_sorted(
         prompts,
         input_func,
         output_func,
     ),
-    "11": lambda prompts, input_func, output_func, root: handle_json_export(
+    "11": lambda prompts, _input_func, output_func, root: handle_json_export(
         prompts,
         output_func,
         root,
     ),
-    "12": lambda prompts, input_func, output_func, root: handle_json_import(
+    "12": lambda prompts, _input_func, output_func, root: handle_json_import(
         prompts,
         output_func,
         root,
     ),
-    "13": lambda prompts, input_func, output_func, root: handle_markdown_export(
+    "13": lambda prompts, _input_func, output_func, root: handle_markdown_export(
         prompts,
         output_func,
         root,
