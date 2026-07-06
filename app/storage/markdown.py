@@ -2,13 +2,11 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-VERSION = 1
-STANDARD_FIELDS = ("title", "content", "category", "favorite", "usage_count")
-MAX_ORDER = 9999
+from constants import MAX_ORDER
+from utils import slugify
 
-
-class StorageError(Exception):
-    pass
+from .errors import StorageError
+from .paths import data_directory
 
 
 @dataclass(frozen=True)
@@ -16,75 +14,6 @@ class _MarkdownExportItem:
     directory: Path
     path: Path
     prompt: dict
-
-
-def project_root():
-    return Path(__file__).resolve().parents[1]
-
-
-def data_directory(root=None):
-    return Path(root if root is not None else project_root()) / "data"
-
-
-def json_file_path(root=None):
-    return data_directory(root) / "prompts.json"
-
-
-def standard_prompt(prompt):
-    return {field: prompt[field] for field in STANDARD_FIELDS}
-
-
-def export_json(prompts, root=None):
-    path = json_file_path(root)
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(_json_payload(prompts), ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-    except OSError as exc:
-        raise StorageError("JSON 파일을 쓸 수 없습니다.") from exc
-    return path
-
-
-def import_json(root=None):
-    path = json_file_path(root)
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except OSError as exc:
-        raise StorageError("JSON 파일을 읽을 수 없습니다.") from exc
-    except json.JSONDecodeError as exc:
-        raise StorageError("JSON 형식이 올바르지 않습니다.") from exc
-
-    if payload.get("version") != VERSION:
-        raise StorageError("지원하지 않는 JSON 버전입니다.")
-    prompts = payload.get("prompts")
-    if not isinstance(prompts, list):
-        raise StorageError("prompts 배열이 없습니다.")
-
-    for prompt in prompts:
-        if not isinstance(prompt, dict):
-            raise StorageError("프롬프트 항목은 객체여야 합니다.")
-        missing_fields = [field for field in STANDARD_FIELDS if field not in prompt]
-        if missing_fields:
-            raise StorageError("프롬프트 항목에 필수 필드가 없습니다.")
-
-    return [dict(prompt) for prompt in prompts]
-
-
-def slugify(value):
-    slug_parts = []
-    in_separator = False
-
-    for char in value.strip():
-        if _is_allowed_slug_char(char):
-            slug_parts.append(char.lower())
-            in_separator = False
-        elif not in_separator:
-            slug_parts.append("-")
-            in_separator = True
-
-    return "".join(slug_parts).strip("-")
 
 
 def export_markdown(prompts, root=None):
@@ -145,13 +74,6 @@ def _validate_markdown_paths(data_dir, export_plan):
             raise StorageError("필요한 파일 위치에 폴더가 있습니다.")
 
 
-def _json_payload(prompts):
-    return {
-        "version": VERSION,
-        "prompts": [standard_prompt(prompt) for prompt in prompts],
-    }
-
-
 def _validate_data_directory(data_dir):
     if data_dir.exists() and not data_dir.is_dir():
         raise StorageError("data 위치에 파일이 있어 내보낼 수 없습니다.")
@@ -183,12 +105,3 @@ def _format_markdown_prompt(prompt):
 
 def _quote_frontmatter(value):
     return json.dumps(str(value), ensure_ascii=False)
-
-
-def _is_allowed_slug_char(char):
-    return (
-        "0" <= char <= "9"
-        or "a" <= char <= "z"
-        or "A" <= char <= "Z"
-        or "\uac00" <= char <= "\ud7a3"
-    )
