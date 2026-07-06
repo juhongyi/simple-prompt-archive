@@ -1,5 +1,8 @@
-STANDARD_FIELDS = ("title", "content", "category", "favorite", "usage_count")
-EDITABLE_FIELDS = ("title", "content", "category")
+from constants import EDITABLE_PROMPT_FIELDS, PROMPT_FIELDS
+from utils import normalize_required_text
+
+STANDARD_FIELDS = PROMPT_FIELDS
+EDITABLE_FIELDS = EDITABLE_PROMPT_FIELDS
 
 
 def create_starter_prompts():
@@ -20,13 +23,6 @@ def create_starter_prompts():
             "automation",
         ),
     ]
-
-
-def normalize_required_text(value):
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError("필수 입력 항목은 비워둘 수 없습니다.")
-    return normalized
 
 
 def add_prompt(prompts, title, content, category):
