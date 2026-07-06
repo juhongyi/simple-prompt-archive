@@ -2,8 +2,12 @@ import archive
 import storage
 
 from .constants import EDIT_FIELD_CHOICES
-from .io import read_multiline_content, read_number, read_prompt_selection
-from .io import read_required_text
+from .io import (
+    read_multiline_content,
+    read_number,
+    read_prompt_selection,
+    read_required_text,
+)
 from .views import print_prompt_rows, print_search_rows, show_prompt_detail
 
 

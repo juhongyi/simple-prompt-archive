@@ -12,8 +12,8 @@ STANDARD_FIELDS = PROMPT_FIELDS
 __all__ = [
     "MAX_ORDER",
     "STANDARD_FIELDS",
-    "StorageError",
     "VERSION",
+    "StorageError",
     "data_directory",
     "export_json",
     "export_markdown",

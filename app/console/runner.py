@@ -6,7 +6,9 @@ from .views import print_menu
 
 
 def run_app(input_func=input, output_func=print, root=None, prompts=None):
-    active_prompts = prompts if prompts is not None else archive.create_starter_prompts()
+    active_prompts = (
+        prompts if prompts is not None else archive.create_starter_prompts()
+    )
 
     while True:
         print_menu(output_func)
