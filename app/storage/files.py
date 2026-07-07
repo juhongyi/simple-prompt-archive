@@ -15,7 +15,7 @@ def export_json(prompts, root=None):
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
-            json.dumps(_json_payload(prompts), ensure_ascii=False, indent=2),
+            json.dumps(json_payload(prompts), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
     except OSError as exc:
@@ -48,7 +48,7 @@ def import_json(root=None):
     return [dict(prompt) for prompt in prompts]
 
 
-def _json_payload(prompts):
+def json_payload(prompts):
     return {
         "version": STORAGE_VERSION,
         "prompts": [standard_prompt(prompt) for prompt in prompts],

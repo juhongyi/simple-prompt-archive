@@ -10,7 +10,7 @@ def slugify(value):
     in_separator = False
 
     for char in value.strip():
-        if _is_allowed_slug_char(char):
+        if is_allowed_slug_char(char):
             slug_parts.append(char.lower())
             in_separator = False
         elif not in_separator:
@@ -20,7 +20,7 @@ def slugify(value):
     return "".join(slug_parts).strip("-")
 
 
-def _is_allowed_slug_char(char):
+def is_allowed_slug_char(char):
     return (
         "0" <= char <= "9"
         or "a" <= char <= "z"

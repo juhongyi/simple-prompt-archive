@@ -126,6 +126,39 @@ def test_slugify_keeps_korean_ascii_letters_and_numbers() -> None:
     assert storage.slugify(" 한글 Better_TITLE 123!!! ") == "한글-better-title-123"
 
 
+def test_is_allowed_slug_char_accepts_slug_character_set() -> None:
+    assert storage.is_allowed_slug_char("한") is True
+    assert storage.is_allowed_slug_char("A") is True
+    assert storage.is_allowed_slug_char("7") is True
+    assert storage.is_allowed_slug_char("_") is False
+
+
+def test_json_payload_uses_standard_schema_and_drops_extra_fields() -> None:
+    assert storage.json_payload(
+        [
+            {
+                "title": "제목",
+                "content": "본문",
+                "category": "writing",
+                "favorite": True,
+                "usage_count": 3,
+                "unknown": "kept only in memory",
+            }
+        ]
+    ) == {
+        "version": 1,
+        "prompts": [
+            {
+                "title": "제목",
+                "content": "본문",
+                "category": "writing",
+                "favorite": True,
+                "usage_count": 3,
+            }
+        ],
+    }
+
+
 def test_export_markdown_groups_by_category_order_and_prompt_order(
     tmp_path: Path,
 ) -> None:

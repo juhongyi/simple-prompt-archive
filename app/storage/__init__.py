@@ -1,8 +1,8 @@
 from constants import MAX_ORDER, PROMPT_FIELDS, STORAGE_VERSION
-from utils import slugify
+from utils import is_allowed_slug_char, slugify
 
 from .errors import StorageError
-from .files import export_json, import_json, standard_prompt
+from .files import export_json, import_json, json_payload, standard_prompt
 from .markdown import export_markdown
 from .paths import data_directory, json_file_path, project_root
 
@@ -18,7 +18,9 @@ __all__ = [
     "export_json",
     "export_markdown",
     "import_json",
+    "is_allowed_slug_char",
     "json_file_path",
+    "json_payload",
     "project_root",
     "slugify",
     "standard_prompt",

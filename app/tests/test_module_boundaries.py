@@ -41,6 +41,8 @@ def test_storage_package_exports_existing_public_api() -> None:
         "standard_prompt",
         "export_json",
         "import_json",
+        "is_allowed_slug_char",
+        "json_payload",
         "slugify",
         "export_markdown",
         "VERSION",
