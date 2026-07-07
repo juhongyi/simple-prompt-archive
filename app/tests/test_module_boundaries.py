@@ -52,3 +52,13 @@ def test_storage_package_exports_existing_public_api() -> None:
 
     for public_name in public_names:
         assert hasattr(storage, public_name)
+
+
+def test_archive_package_exports_refactored_public_api() -> None:
+    public_names = [
+        "create_prompt",
+        "prompt_index_from_number",
+    ]
+
+    for public_name in public_names:
+        assert hasattr(archive, public_name)

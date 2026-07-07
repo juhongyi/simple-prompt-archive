@@ -2,6 +2,16 @@ import archive
 import pytest
 
 
+def test_create_prompt_trims_required_values_and_sets_defaults() -> None:
+    assert archive.create_prompt("  제목  ", "  본문\n", "  writing  ") == {
+        "title": "제목",
+        "content": "본문",
+        "category": "writing",
+        "favorite": False,
+        "usage_count": 0,
+    }
+
+
 def test_starter_prompts_include_required_fields() -> None:
     prompts = archive.create_starter_prompts()
 
@@ -185,6 +195,13 @@ def test_select_prompt_by_number_returns_none_for_cancel() -> None:
 
     assert archive.select_prompt_by_number(prompts, 0) is None
     assert archive.select_prompt_by_number(prompts, 2) == {"title": "second"}
+
+
+def test_prompt_index_from_number_returns_zero_based_index() -> None:
+    prompts = [{"title": "first"}, {"title": "second"}]
+
+    assert archive.prompt_index_from_number(prompts, 1) == 0
+    assert archive.prompt_index_from_number(prompts, 0, allow_cancel=True) is None
 
 
 @pytest.mark.parametrize("number", [-1, 3])
