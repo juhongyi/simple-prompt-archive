@@ -126,6 +126,39 @@ def test_slugify_keeps_korean_ascii_letters_and_numbers() -> None:
     assert storage.slugify(" 한글 Better_TITLE 123!!! ") == "한글-better-title-123"
 
 
+def test_is_allowed_slug_char_accepts_slug_character_set() -> None:
+    assert storage.is_allowed_slug_char("한") is True
+    assert storage.is_allowed_slug_char("A") is True
+    assert storage.is_allowed_slug_char("7") is True
+    assert storage.is_allowed_slug_char("_") is False
+
+
+def test_json_payload_uses_standard_schema_and_drops_extra_fields() -> None:
+    assert storage.json_payload(
+        [
+            {
+                "title": "제목",
+                "content": "본문",
+                "category": "writing",
+                "favorite": True,
+                "usage_count": 3,
+                "unknown": "kept only in memory",
+            }
+        ]
+    ) == {
+        "version": 1,
+        "prompts": [
+            {
+                "title": "제목",
+                "content": "본문",
+                "category": "writing",
+                "favorite": True,
+                "usage_count": 3,
+            }
+        ],
+    }
+
+
 def test_export_markdown_groups_by_category_order_and_prompt_order(
     tmp_path: Path,
 ) -> None:
@@ -168,6 +201,76 @@ def test_export_markdown_groups_by_category_order_and_prompt_order(
         "usage_count: 0\n"
         "---\n\n"
         "본문"
+    )
+
+
+def test_plan_markdown_export_returns_reusable_export_items(tmp_path: Path) -> None:
+    prompt = {
+        "title": "First Prompt",
+        "content": "본문",
+        "category": "Writing",
+        "favorite": False,
+        "usage_count": 0,
+    }
+
+    plan = storage.plan_markdown_export([prompt], tmp_path / "data")
+
+    assert plan == [
+        storage.MarkdownExportItem(
+            directory=tmp_path / "data" / "0001-writing",
+            path=tmp_path / "data" / "0001-writing" / "0001-first-prompt.md",
+            prompt=prompt,
+        )
+    ]
+
+
+def test_group_prompts_by_category_keeps_first_seen_order() -> None:
+    writing = {
+        "title": "First",
+        "content": "body",
+        "category": "Writing",
+        "favorite": False,
+        "usage_count": 0,
+    }
+    image = {
+        "title": "Image",
+        "content": "body",
+        "category": "Image",
+        "favorite": False,
+        "usage_count": 0,
+    }
+    second_writing = {
+        "title": "Second",
+        "content": "body",
+        "category": "Writing",
+        "favorite": False,
+        "usage_count": 0,
+    }
+
+    assert storage.group_prompts_by_category([writing, image, second_writing]) == [
+        ("Writing", [writing, second_writing]),
+        ("Image", [image]),
+    ]
+
+
+def test_format_markdown_prompt_and_quote_frontmatter_are_public() -> None:
+    prompt = {
+        "title": '한글 "title"',
+        "content": "content",
+        "category": "분류",
+        "favorite": True,
+        "usage_count": 9,
+    }
+
+    assert storage.quote_frontmatter(prompt["title"]) == '"한글 \\"title\\""'
+    assert storage.format_markdown_prompt(prompt) == (
+        "---\n"
+        'title: "한글 \\"title\\""\n'
+        'category: "분류"\n'
+        "favorite: true\n"
+        "usage_count: 9\n"
+        "---\n\n"
+        "content"
     )
 
 

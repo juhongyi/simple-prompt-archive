@@ -1,5 +1,9 @@
 import archive
 import console
+import console.handlers.file_flows
+import console.handlers.menu
+import console.handlers.mutation_flows
+import console.handlers.prompt_flows
 import constants
 import storage
 
@@ -32,6 +36,13 @@ def test_console_package_exports_existing_public_api() -> None:
         assert hasattr(console, public_name)
 
 
+def test_console_handler_flows_are_split_into_public_modules() -> None:
+    assert hasattr(console.handlers.prompt_flows, "handle_add_prompt")
+    assert hasattr(console.handlers.mutation_flows, "handle_update")
+    assert hasattr(console.handlers.file_flows, "handle_json_export")
+    assert hasattr(console.handlers.menu, "MENU_ACTIONS")
+
+
 def test_storage_package_exports_existing_public_api() -> None:
     public_names = [
         "StorageError",
@@ -41,8 +52,17 @@ def test_storage_package_exports_existing_public_api() -> None:
         "standard_prompt",
         "export_json",
         "import_json",
+        "is_allowed_slug_char",
+        "json_payload",
         "slugify",
         "export_markdown",
+        "MarkdownExportItem",
+        "format_markdown_prompt",
+        "group_prompts_by_category",
+        "plan_markdown_export",
+        "quote_frontmatter",
+        "validate_data_directory",
+        "validate_markdown_paths",
         "VERSION",
         "STANDARD_FIELDS",
         "MAX_ORDER",
@@ -50,3 +70,13 @@ def test_storage_package_exports_existing_public_api() -> None:
 
     for public_name in public_names:
         assert hasattr(storage, public_name)
+
+
+def test_archive_package_exports_refactored_public_api() -> None:
+    public_names = [
+        "create_prompt",
+        "prompt_index_from_number",
+    ]
+
+    for public_name in public_names:
+        assert hasattr(archive, public_name)
